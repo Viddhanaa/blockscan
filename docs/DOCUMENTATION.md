@@ -79,7 +79,10 @@ Viddhana Blockscan is a complete blockchain infrastructure solution consisting o
 | Block Explorer | https://scan.viddhana.com | Blockscout Explorer UI |
 | RPC Endpoint | https://rpc.viddhana.com | JSON-RPC API |
 | KYC API | https://api.viddhana.com | KYC REST API |
+| WebSocket | wss://wss.viddhana.com | Direct WebSocket to backend |
+| WebSocket via Nginx | wss://ws.viddhana.com | WebSocket through Nginx |
 | Main Website | https://viddhana.com | Main website |
+| Documentation | https://docs.viddhana.com | Documentation site |
 
 ### Local Development
 
@@ -374,11 +377,13 @@ Response:
 |-----------|-------|-------|---------|
 | viddhana-node1 | ethereum/client-go:v1.13.15 | 8545, 8546, 30303 | Primary validator |
 | viddhana-node2 | ethereum/client-go:v1.13.15 | 8547, 8548, 30304 | Secondary validator |
-| viddhana-blockscout-backend | blockscout/blockscout:latest | 14000 | Explorer backend/indexer |
+| viddhana-blockscout-backend | blockscout/blockscout:latest | 4000, 14000 | Explorer backend/indexer |
 | viddhana-blockscout-frontend | ghcr.io/blockscout/frontend:latest | 13000 | Explorer frontend |
 | viddhana-nginx | nginx:alpine | 15000 | Reverse proxy |
-| viddhana-db | postgres:14 | - | Blockscout database |
-| viddhana-redis | redis:alpine | - | Blockscout cache |
+| viddhana-kyc-api | custom | 3001 | KYC middleware API |
+| viddhana-ws-relay | custom | 16000 | WebSocket relay (bypasses Cloudflare HTTP/2) |
+| viddhana-db | postgres:14 | 5432 | Blockscout database |
+| viddhana-redis | redis:alpine | 6379 | Blockscout cache |
 
 ### Docker Networks
 
@@ -656,4 +661,4 @@ docker cp viddhana-node2:/root/.ethereum ./node2-backup
 
 ---
 
-*Last updated: December 6, 2025*
+*Last updated: December 9, 2025*

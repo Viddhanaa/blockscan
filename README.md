@@ -9,7 +9,9 @@ A private Ethereum-based blockchain network with Proof of Authority (Clique) con
 | **Block Explorer** | https://scan.viddhana.com | Blockscout Explorer |
 | **RPC Endpoint** | https://rpc.viddhana.com | JSON-RPC API |
 | **KYC API** | https://api.viddhana.com | KYC REST API |
+| **WebSocket** | wss://wss.viddhana.com | Direct WebSocket to backend |
 | **Main Website** | https://viddhana.com | Main website |
+| **Documentation** | https://docs.viddhana.com | Documentation site |
 
 ## Architecture
 
@@ -123,11 +125,13 @@ viddhana-blockscan/
 |-----------|------|---------|
 | viddhana-node1 | 8545, 8546, 30303 | Primary validator |
 | viddhana-node2 | 8547, 8548, 30304 | Secondary validator |
-| viddhana-blockscout-backend | 14000 | Explorer indexer |
+| viddhana-blockscout-backend | 4000, 14000 | Explorer indexer & API |
 | viddhana-blockscout-frontend | 13000 | Explorer UI |
 | viddhana-nginx | 15000 | Reverse proxy |
-| viddhana-db | - | PostgreSQL database |
-| viddhana-redis | - | Redis cache |
+| viddhana-kyc-api | 3001 | KYC middleware API |
+| viddhana-ws-relay | 16000 | WebSocket relay |
+| viddhana-db | 5432 | PostgreSQL database |
+| viddhana-redis | 6379 | Redis cache |
 
 ## Local Development
 
@@ -214,4 +218,4 @@ MIT License - See LICENSE file for details.
 
 ---
 
-*Last updated: December 6, 2025*
+*Last updated: December 9, 2025*

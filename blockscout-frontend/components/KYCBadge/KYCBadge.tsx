@@ -88,7 +88,7 @@ export const KYCBadge: React.FC<KYCBadgeProps> = ({
   address,
   showTooltip = true,
   size = 'md',
-  apiUrl = '/api/v1/kyc',
+  apiUrl = process.env.NEXT_PUBLIC_KYC_API_URL || 'http://localhost:3001',
 }) => {
   const [kycData, setKycData] = useState<KYCData>({ status: 'loading' });
 
@@ -102,7 +102,8 @@ export const KYCBadge: React.FC<KYCBadgeProps> = ({
       }
 
       try {
-        const response = await fetch(`${apiUrl}/status/${address}`, {
+        // Use the correct KYC API endpoint that matches the actual API
+        const response = await fetch(`${apiUrl}/rpc/check_kyc?address=${address}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -120,11 +121,14 @@ export const KYCBadge: React.FC<KYCBadgeProps> = ({
 
         const data = await response.json();
         
+        // Map the actual API response to our KYCData format
+        // API returns: { success, data: { address, isKYCApproved, approvedAt, approvedAtTimestamp } }
         setKycData({
-          status: data.is_verified ? 'verified' : data.is_pending ? 'pending' : 'unverified',
-          verifiedAt: data.verified_at,
-          expiresAt: data.expires_at,
-          verificationLevel: data.verification_level,
+          status: data.data?.isKYCApproved ? 'verified' : 'unverified',
+          verifiedAt: data.data?.approvedAt,
+          // Note: Current API doesn't return expiresAt or verificationLevel
+          expiresAt: undefined,
+          verificationLevel: undefined,
         });
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
@@ -240,18 +244,21 @@ export const KYCBadgeCompact: React.FC<{
   apiUrl?: string;
 }> = ({ address, apiUrl }) => {
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const baseUrl = apiUrl || process.env.NEXT_PUBLIC_KYC_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
     const controller = new AbortController();
 
     const checkStatus = async () => {
       try {
-        const response = await fetch(`${apiUrl || '/api/v1/kyc'}/status/${address}`, {
+        // Use the correct KYC API endpoint
+        const response = await fetch(`${baseUrl}/rpc/check_kyc?address=${address}`, {
           signal: controller.signal,
         });
         if (response.ok) {
           const data = await response.json();
-          setIsVerified(data.is_verified);
+          // Map actual API response: { success, data: { isKYCApproved } }
+          setIsVerified(data.data?.isKYCApproved === true);
         }
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
@@ -262,7 +269,7 @@ export const KYCBadgeCompact: React.FC<{
     };
     checkStatus();
     return () => controller.abort();
-  }, [address, apiUrl]);
+  }, [address, baseUrl]);
 
   if (isVerified === null) return null;
   if (!isVerified) return null;

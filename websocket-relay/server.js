@@ -11,8 +11,8 @@ const WebSocket = require('ws');
 const url = require('url');
 
 // Configuration
-const PORT = process.env.PORT || 16000;
-const BACKEND_WS_URL = process.env.BACKEND_WS_URL || 'ws://127.0.0.1:14000';
+const PORT = process.env.PORT || 3000;
+const BACKEND_WS_URL = process.env.BACKEND_WS_URL || 'ws://viddhana-blockscout-backend:4000';
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*').split(',');
 
 // Connection limits
