@@ -1,0 +1,227 @@
+version: '3.8'
+
+# ===========================================
+# Viddhana Blockscan - Docker Compose
+# ===========================================
+# Main orchestration file for all services
+
+services:
+  # -------------------------------------------
+  # Geth Node 1 - Primary Validator
+  # -------------------------------------------
+  geth-node1:
+    image: ethereum/client-go:v1.13.15
+    container_name: viddhana-node1
+    hostname: geth-node1
+    restart: unless-stopped
+    ports:
+      - "8545:8545"   # HTTP RPC
+      - "8546:8546"   # WebSocket RPC
+      - "30303:30303" # P2P TCP
+      - "30303:30303/udp" # P2P UDP
+    volumes:
+      - ./node1/data:/root/.ethereum
+      - ./config/genesis.json:/root/genesis.json:ro
+      - ./config/password.txt:/root/password.txt:ro
+    environment:
+      - NETWORK_ID=${NETWORK_ID:-1337}
+    command: >
+      --networkid ${NETWORK_ID:-1337}
+      --datadir /root/.ethereum
+      --http
+      --http.addr 0.0.0.0
+      --http.port 8545
+      --http.api eth,net,web3,txpool,clique,debug
+      --http.corsdomain ${HTTP_CORSDOMAIN:-https://scan.viddhana.com,https://rpc.viddhana.com}
+      --http.vhosts ${HTTP_VHOSTS:-scan.viddhana.com,rpc.viddhana.com,localhost}
+      --ws
+      --ws.addr 0.0.0.0
+      --ws.port 8546
+      --ws.api eth,net,web3,txpool,clique,debug
+      --ws.origins ${WS_ORIGINS:-https://scan.viddhana.com,https://rpc.viddhana.com}
+      --port 30303
+      --unlock ${SIGNER_ADDRESS_1}
+      --password /root/password.txt --allow-insecure-unlock
+      --mine
+      --miner.etherbase ${SIGNER_ADDRESS_1}
+      --syncmode full
+      --gcmode archive
+      --verbosity 3
+    networks:
+      - viddhana-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8545"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # -------------------------------------------
+  # Geth Node 2 - Secondary Validator
+  # -------------------------------------------
+  geth-node2:
+    image: ethereum/client-go:v1.13.15
+    container_name: viddhana-node2
+    hostname: geth-node2
+    restart: unless-stopped
+    ports:
+      - "8547:8545"   # HTTP RPC (different host port)
+      - "8548:8546"   # WebSocket RPC
+      - "30304:30303" # P2P TCP
+      - "30304:30303/udp" # P2P UDP
+    volumes:
+      - ./node2/data:/root/.ethereum
+      - ./config/genesis.json:/root/genesis.json:ro
+      - ./config/password.txt:/root/password.txt:ro
+    environment:
+      - NETWORK_ID=${NETWORK_ID:-1337}
+    command: >
+      --networkid ${NETWORK_ID:-1337}
+      --datadir /root/.ethereum
+      --http
+      --http.addr 0.0.0.0
+      --http.port 8545
+      --http.api eth,net,web3,txpool,clique,debug
+      --http.corsdomain ${HTTP_CORSDOMAIN:-https://scan.viddhana.com,https://rpc.viddhana.com}
+      --http.vhosts ${HTTP_VHOSTS:-scan.viddhana.com,rpc.viddhana.com,localhost}
+      --ws
+      --ws.addr 0.0.0.0
+      --ws.port 8546
+      --ws.api eth,net,web3,txpool,clique,debug
+      --ws.origins ${WS_ORIGINS:-https://scan.viddhana.com,https://rpc.viddhana.com}
+      --port 30303
+      --unlock ${SIGNER_ADDRESS_2}
+      --password /root/password.txt --allow-insecure-unlock
+      --mine
+      --miner.etherbase ${SIGNER_ADDRESS_2}
+      --bootnodes ${BOOTNODE_ENODE}
+      --syncmode full
+      --verbosity 3
+    networks:
+      - viddhana-network
+    depends_on:
+      geth-node1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8545"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # -------------------------------------------
+  # KYC API - Middleware Service
+  # -------------------------------------------
+  kyc-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: viddhana-kyc-api
+    hostname: kyc-api
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - RPC_URL=http://geth-node1:8545
+      - WS_URL=ws://geth-node1:8546
+      - CHAIN_ID=${CHAIN_ID:-1337}
+      - KYC_CONTRACT_ADDRESS=${KYC_CONTRACT_ADDRESS}
+      - ADMIN_PRIVATE_KEY=${ADMIN_PRIVATE_KEY}
+      - API_KEY=${API_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - WS_RECONNECT_INTERVAL=5000
+      - WS_MAX_RECONNECT_ATTEMPTS=10
+    volumes:
+      - ./api/logs:/app/logs
+    networks:
+      - viddhana-network
+    depends_on:
+      geth-node1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # -------------------------------------------
+  # WebSocket Relay - Bypass Cloudflare HTTP/2
+  # -------------------------------------------
+  websocket-relay:
+    build:
+      context: ./websocket-relay
+      dockerfile: Dockerfile
+    container_name: viddhana-ws-relay
+    hostname: websocket-relay
+    restart: unless-stopped
+    ports:
+      - "16000:3000"
+    environment:
+      - PORT=3000
+      - BACKEND_WS_URL=ws://viddhana-blockscout-backend:4000
+      - ALLOWED_ORIGINS=*
+    networks:
+      - viddhana-network
+      - viddhana-blockscout-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # -------------------------------------------
+  # Nginx Reverse Proxy - WebSocket Support
+  # -------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: viddhana-nginx
+    hostname: nginx
+    restart: unless-stopped
+    ports:
+      - "15000:80"
+      - "443:443"
+      - "8443:8443"
+      - "2053:2053"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - viddhana-network
+      - viddhana-blockscout-network
+    depends_on:
+      - geth-node1
+      - geth-node2
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# -------------------------------------------
+# Networks
+# -------------------------------------------
+networks:
+  viddhana-network:
+    external: true
+  # External network to connect to Blockscout
+  viddhana-blockscout-network:
+    external: true
+
+# -------------------------------------------
+# Volumes (for data persistence)
+# -------------------------------------------
+volumes:
+  node1-data:
+    driver: local
+  node2-data:
+    driver: local
+  api-logs:
+    driver: local

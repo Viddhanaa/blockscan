@@ -1,0 +1,51 @@
+tunnel: blockscan
+credentials-file: /etc/cloudflared/blockscan.json
+# Changed from quic to http2 to fix WebSocket issues
+protocol: http2
+
+ingress:
+  - hostname: viddhana.com
+    service: http://127.0.0.1:3200
+  - hostname: www.viddhana.com
+    service: http://127.0.0.1:3200
+  - hostname: docs.viddhana.com
+    service: http://127.0.0.1:3030
+  - hostname: miner.viddhana.com
+    service: http://127.0.0.1:8000
+  - hostname: miner-api.viddhana.com
+    service: http://127.0.0.1:3005
+  - hostname: pool.viddhana.com
+    service: http://172.21.0.3:80
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 10s
+  - hostname: pool-api.viddhana.com
+    service: http://127.0.0.1:5001
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+  - hostname: rpc.viddhana.com
+    service: http://127.0.0.1:8545
+  - hostname: api.viddhana.com
+    service: http://127.0.0.1:4002
+  # WebSocket subdomain - route to nginx with WebSocket support
+  - hostname: ws.viddhana.com
+    service: http://127.0.0.1:15000
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 60s
+      http2Origin: false
+      disableChunkedEncoding: true
+      keepAliveConnections: 100
+      keepAliveTimeout: 90s
+  # Main scan subdomain with WebSocket support
+  - hostname: scan.viddhana.com
+    service: http://127.0.0.1:15000
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 60s
+      http2Origin: false
+      disableChunkedEncoding: true
+      keepAliveConnections: 100
+      keepAliveTimeout: 120s
+  - service: http_status:404

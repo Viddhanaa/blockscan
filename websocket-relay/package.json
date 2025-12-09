@@ -1,0 +1,14 @@
+{
+  "name": "viddhana-websocket-relay",
+  "version": "1.0.0",
+  "description": "WebSocket relay proxy for Blockscout to bypass Cloudflare HTTP/2 limitations",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "http-proxy": "^1.18.1"
+  }
+}

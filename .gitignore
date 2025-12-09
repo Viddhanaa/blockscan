@@ -1,0 +1,109 @@
+# ===========================================
+# Viddhana Blockscan - Git Ignore File
+# ===========================================
+
+# -------------------------------------------
+# Environment Files
+# -------------------------------------------
+.env
+.env.local
+.env.development
+.env.production
+*.env
+
+# -------------------------------------------
+# Private Keys & Secrets
+# -------------------------------------------
+password.txt
+**/keystore/*
+*.key
+*.pem
+secrets/
+
+# -------------------------------------------
+# Node Modules & Dependencies
+# -------------------------------------------
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+env/
+*.egg-info/
+
+# -------------------------------------------
+# Build Artifacts
+# -------------------------------------------
+build/
+dist/
+artifacts/
+cache/
+*.tsbuildinfo
+.next/
+out/
+
+# -------------------------------------------
+# Blockchain Data
+# -------------------------------------------
+node1/data/geth/
+node2/data/geth/
+node1/data/keystore/
+node2/data/keystore/
+blockscout/postgres-data/
+blockscout/redis-data/
+blockscout/logs/
+
+# -------------------------------------------
+# Logs
+# -------------------------------------------
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -------------------------------------------
+# Backups
+# -------------------------------------------
+backups/*
+!backups/.gitkeep
+
+# -------------------------------------------
+# IDE & Editor Files
+# -------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# -------------------------------------------
+# OS Generated Files
+# -------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# -------------------------------------------
+# Test & Coverage
+# -------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+
+# -------------------------------------------
+# Misc
+# -------------------------------------------
+*.bak
+*.tmp
+*.temp
+.cache/

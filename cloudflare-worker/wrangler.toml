@@ -1,0 +1,29 @@
+# Cloudflare Worker Configuration for WebSocket Proxy
+# 
+# Prerequisites:
+# 1. Install Wrangler CLI: npm install -g wrangler
+# 2. Login to Cloudflare: wrangler login
+# 3. Deploy: wrangler deploy
+
+name = "viddhana-websocket-proxy"
+main = "websocket-proxy.js"
+compatibility_date = "2024-01-01"
+
+# Account and zone configuration (update with your values)
+# account_id = "your-account-id"
+# zone_id = "your-zone-id"
+
+# Route configuration - handles WebSocket paths
+# Uncomment and update after getting your zone_id
+# routes = [
+#   { pattern = "scan.viddhana.com/socket/*", zone_name = "viddhana.com" }
+# ]
+
+# For development/testing
+[dev]
+port = 8787
+local_protocol = "http"
+
+# Environment variables (if needed)
+[vars]
+ORIGIN_HOST = "scan.viddhana.com"

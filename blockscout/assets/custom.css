@@ -1,0 +1,475 @@
+/* Viddhana Blockscan Custom Styles */
+
+/* ============================================
+   CSS Variables
+   ============================================ */
+:root {
+  --viddhana-primary: #4A90E2;
+  --viddhana-secondary: #00C6FF;
+  --viddhana-gradient: linear-gradient(90deg, #4A90E2 0%, #00C6FF 100%);
+  --viddhana-success: #28A745;
+  --viddhana-warning: #FFC107;
+  --viddhana-danger: #DC3545;
+  --viddhana-dark: #1A1A2E;
+  --viddhana-card-radius: 12px;
+  --viddhana-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --viddhana-shadow-hover: 0 8px 25px rgba(74, 144, 226, 0.25);
+}
+
+/* ============================================
+   Header Styling
+   ============================================ */
+.header,
+header[class*="Header"],
+[data-testid="header"],
+.app-header {
+  background: var(--viddhana-gradient) !important;
+  box-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
+}
+
+.header-logo,
+.navbar-brand {
+  filter: brightness(1.1);
+}
+
+.header nav a,
+.header .nav-link,
+header a {
+  color: rgba(255, 255, 255, 0.9) !important;
+  transition: color 0.2s ease;
+}
+
+.header nav a:hover,
+.header .nav-link:hover,
+header a:hover {
+  color: #FFFFFF !important;
+}
+
+/* ============================================
+   Card Styling
+   ============================================ */
+.card,
+[class*="Card"],
+.tile,
+.panel {
+  border-radius: var(--viddhana-card-radius) !important;
+  border: 1px solid rgba(74, 144, 226, 0.1);
+  box-shadow: var(--viddhana-shadow);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  overflow: hidden;
+}
+
+.card:hover,
+[class*="Card"]:hover {
+  box-shadow: var(--viddhana-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.card-header,
+[class*="CardHeader"] {
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.05) 0%, rgba(0, 198, 255, 0.05) 100%);
+  border-bottom: 1px solid rgba(74, 144, 226, 0.1);
+}
+
+/* ============================================
+   KYC Badge Styling
+   ============================================ */
+.kyc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: var(--viddhana-success);
+  color: #FFFFFF;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kyc-badge--verified {
+  background-color: var(--viddhana-success);
+}
+
+.kyc-badge--pending {
+  background-color: var(--viddhana-warning);
+  color: #1A1A2E;
+}
+
+.kyc-badge--unverified {
+  background-color: #6C757D;
+}
+
+.kyc-badge__icon {
+  width: 14px;
+  height: 14px;
+}
+
+.kyc-badge__checkmark {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* ============================================
+   Stats Card Styling
+   ============================================ */
+.stats-card,
+[class*="StatsCard"],
+.stat-tile {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  border-radius: var(--viddhana-card-radius);
+  padding: 20px;
+  border: 1px solid rgba(74, 144, 226, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--viddhana-gradient);
+}
+
+.stats-card__value,
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--viddhana-primary);
+  line-height: 1.2;
+}
+
+.stats-card__label,
+.stat-label {
+  font-size: 13px;
+  color: #6C757D;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.stats-card__icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.1;
+  font-size: 48px;
+  color: var(--viddhana-primary);
+}
+
+/* Dark mode stats */
+[data-theme="dark"] .stats-card,
+.dark .stats-card {
+  background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+  border-color: rgba(74, 144, 226, 0.3);
+}
+
+[data-theme="dark"] .stats-card__value,
+.dark .stats-card__value {
+  color: #00C6FF;
+}
+
+/* ============================================
+   Search Bar Styling
+   ============================================ */
+.search-bar,
+[class*="SearchBar"],
+.search-input,
+input[type="search"],
+.address-search input {
+  border-radius: 24px !important;
+  padding: 12px 20px !important;
+  border: 2px solid rgba(74, 144, 226, 0.2) !important;
+  background: #FFFFFF !important;
+  transition: all 0.3s ease !important;
+  font-size: 14px !important;
+}
+
+.search-bar:focus,
+[class*="SearchBar"]:focus,
+.search-input:focus,
+input[type="search"]:focus {
+  border-color: var(--viddhana-primary) !important;
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15) !important;
+  outline: none !important;
+}
+
+.search-bar::placeholder,
+input[type="search"]::placeholder {
+  color: #A0AEC0;
+}
+
+.search-button,
+.search-bar + button,
+button[type="submit"][class*="search"] {
+  border-radius: 24px !important;
+  background: var(--viddhana-gradient) !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.search-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+}
+
+/* Dark mode search */
+[data-theme="dark"] .search-bar,
+.dark .search-bar,
+[data-theme="dark"] input[type="search"],
+.dark input[type="search"] {
+  background: #1E293B !important;
+  border-color: rgba(74, 144, 226, 0.3) !important;
+  color: #E2E8F0 !important;
+}
+
+/* ============================================
+   Footer Dark Styling
+   ============================================ */
+.footer,
+footer,
+[class*="Footer"] {
+  background: var(--viddhana-dark) !important;
+  color: #A0AEC0 !important;
+  padding: 40px 0 !important;
+  border-top: 1px solid rgba(74, 144, 226, 0.2);
+}
+
+.footer a,
+footer a {
+  color: #B8D4F0 !important;
+  transition: color 0.2s ease;
+}
+
+.footer a:hover,
+footer a:hover {
+  color: var(--viddhana-secondary) !important;
+}
+
+.footer__logo {
+  opacity: 0.9;
+}
+
+.footer__copyright {
+  color: #64748B;
+  font-size: 13px;
+  margin-top: 24px;
+}
+
+.footer__social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(74, 144, 226, 0.1);
+  margin: 0 8px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.footer__social-links a:hover {
+  background: var(--viddhana-gradient);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.btn-primary,
+button[class*="primary"],
+.chakra-button[data-variant="primary"] {
+  background: var(--viddhana-gradient) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+.table,
+table {
+  border-radius: var(--viddhana-card-radius);
+  overflow: hidden;
+}
+
+.table th,
+table th {
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.08) 0%, rgba(0, 198, 255, 0.08) 100%);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: var(--viddhana-primary);
+}
+
+.table tr:hover,
+table tbody tr:hover {
+  background: rgba(74, 144, 226, 0.04);
+}
+
+/* ============================================
+   Address Tags
+   ============================================ */
+.address-tag,
+.hash-tag {
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 13px;
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.1) 0%, rgba(0, 198, 255, 0.1) 100%);
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--viddhana-primary);
+}
+
+/* ============================================
+   Transaction Status
+   ============================================ */
+.tx-status--success {
+  color: var(--viddhana-success);
+}
+
+.tx-status--failed {
+  color: var(--viddhana-danger);
+}
+
+.tx-status--pending {
+  color: var(--viddhana-warning);
+}
+
+/* ============================================
+   Loading States
+   ============================================ */
+.skeleton,
+[class*="Skeleton"] {
+  background: linear-gradient(90deg, #F0F0F0 25%, #E0E0E0 50%, #F0F0F0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+@media (max-width: 768px) {
+  .stats-card {
+    padding: 16px;
+  }
+  
+  .stats-card__value {
+    font-size: 22px;
+  }
+  
+  .search-bar,
+  input[type="search"] {
+    padding: 10px 16px !important;
+  }
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #4A90E2, #00C6FF);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4A90E2;
+}
+
+/* Dark mode scrollbar */
+[data-theme="dark"]::-webkit-scrollbar-track,
+.dark ::-webkit-scrollbar-track {
+  background: #1E293B;
+}
+
+/* ============================================
+   Hide Blockscout Logo and Branding
+   ============================================ */
+/* Hide logo in header */
+header a[href="/"] > div:first-child,
+.chakra-stack a[href="/"] svg,
+.chakra-stack a[href="/"] img,
+a[aria-label*="logo"],
+a[aria-label*="Logo"],
+[class*="NetworkLogo"],
+[class*="network-logo"],
+[data-testid="network-logo"],
+header [class*="Logo"],
+nav [class*="Logo"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Hide "Blockscout" text */
+header a[href="/"] span,
+[class*="NetworkName"],
+[class*="network-name"],
+header [class*="chakra-text"]:first-of-type {
+  display: none !important;
+}
+
+/* Remove the entire logo container if needed */
+header > div > div:first-child > a[href="/"] {
+  display: none !important;
+}
+
+/* Alternative: Hide by targeting specific Blockscout elements */
+[class*="HeaderLogo"],
+[class*="header-logo"],
+[class*="TopBar"] a[href="/"]:first-child {
+  display: none !important;
+}

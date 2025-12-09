@@ -1,0 +1,33 @@
+{
+  "name": "viddhana-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Viddhana Blockscan",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js --network viddhana",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "interact": "hardhat run scripts/interact.js --network viddhana",
+    "export-abi": "node scripts/export-abi.js",
+    "clean": "hardhat clean"
+  },
+  "keywords": [
+    "blockchain",
+    "kyc",
+    "viddhana",
+    "ethereum",
+    "solidity"
+  ],
+  "author": "Viddhana Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@ethereumjs/wallet": "^10.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "dotenv": "^17.2.3",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.0"
+  }
+}

@@ -1,0 +1,295 @@
+# =============================================================================
+# Viddhana Blockscan - Blockscout Docker Compose
+# Phase 4: Explorer Infrastructure
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: viddhana-blockscout-postgres
+    restart: unless-stopped
+    command: postgres -c max_connections=200
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-blockscout}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in environment}
+      POSTGRES_DB: ${POSTGRES_DB:-blockscout}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "5434:5432"  # Use 5434 externally since 5432 is used by viddhana-postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blockscout -d blockscout"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - blockscout-network
+
+  # ---------------------------------------------------------------------------
+  # Redis Cache
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: viddhana-blockscout-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6381:6379"  # Use 6381 externally since 6379 is used by viddhana-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - blockscout-network
+
+  # ---------------------------------------------------------------------------
+  # Smart Contract Verifier
+  # ---------------------------------------------------------------------------
+  smart-contract-verifier:
+    image: ghcr.io/blockscout/smart-contract-verifier:latest
+    container_name: viddhana-smart-contract-verifier
+    restart: unless-stopped
+    environment:
+      SMART_CONTRACT_VERIFIER__SERVER__HTTP__ENABLED: "true"
+      SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR: 0.0.0.0:8050
+      SMART_CONTRACT_VERIFIER__SERVER__GRPC__ENABLED: "false"
+      SMART_CONTRACT_VERIFIER__SOLIDITY__ENABLED: "true"
+      SMART_CONTRACT_VERIFIER__SOLIDITY__COMPILERS_DIR: /tmp/solidity-compilers
+      SMART_CONTRACT_VERIFIER__SOLIDITY__REFRESH_VERSIONS_SCHEDULE: 0 0 * * * * *
+      SMART_CONTRACT_VERIFIER__VYPER__ENABLED: "true"
+      SMART_CONTRACT_VERIFIER__VYPER__COMPILERS_DIR: /tmp/vyper-compilers
+      SMART_CONTRACT_VERIFIER__VYPER__REFRESH_VERSIONS_SCHEDULE: 0 0 * * * * *
+      SMART_CONTRACT_VERIFIER__SOURCIFY__ENABLED: "true"
+      SMART_CONTRACT_VERIFIER__SOURCIFY__API_URL: https://sourcify.dev/server/
+      SMART_CONTRACT_VERIFIER__SOURCIFY__REQUEST_TIMEOUT: 10
+      SMART_CONTRACT_VERIFIER__METRICS__ENABLED: "false"
+    ports:
+      - "8050:8050"
+    volumes:
+      - sc_verifier_compilers:/tmp
+    healthcheck:
+      disable: true
+    networks:
+      - blockscout-network
+
+  # ---------------------------------------------------------------------------
+  # Blockscout Backend
+  # ---------------------------------------------------------------------------
+  blockscout:
+    image: ghcr.io/blockscout/blockscout:8.1.2
+    container_name: viddhana-blockscout-backend
+    restart: unless-stopped
+    stop_grace_period: 5m
+    command: sh -c "bin/blockscout eval \"Elixir.Explorer.ReleaseTasks.create_and_migrate()\" && bin/blockscout start"
+    environment:
+      # Database
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set in environment}
+      
+      # Ethereum JSON-RPC - Using direct IP due to v8.x DNS resolution issues
+      ETHEREUM_JSONRPC_VARIANT: ${ETHEREUM_JSONRPC_VARIANT:-geth}
+      ETHEREUM_JSONRPC_HTTP_URL: http://172.18.0.2:8545
+      ETHEREUM_JSONRPC_WS_URL: ws://172.18.0.2:8546
+      ETHEREUM_JSONRPC_TRACE_URL: http://172.18.0.2:8545
+      ETHEREUM_JSONRPC_HTTP_INSECURE: "true"
+      
+      # Chain Configuration
+      CHAIN_ID: ${CHAIN_ID:-1337}
+      NETWORK: ${NETWORK:-Viddhana}
+      SUBNETWORK: ${SUBNETWORK:-Viddhana Mainnet}
+      COIN: ${COIN:-BTCD}
+      COIN_NAME: ${COIN_NAME:-BTC Diamond}
+      
+      # Block Configuration
+      BLOCK_TRANSFORMER: ${BLOCK_TRANSFORMER:-clique}
+      BLOCKSCOUT_PROTOCOL: ${BLOCKSCOUT_PROTOCOL:-http}
+      BLOCKSCOUT_HOST: ${BLOCKSCOUT_HOST:-localhost}
+      
+      # Indexer Configuration
+      INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: "false"
+      INDEXER_DISABLE_INTERNAL_TRANSACTIONS_FETCHER: "false"
+      INDEXER_DISABLE_CATALOGED_TOKEN_UPDATER_FETCHER: "false"
+      INDEXER_MEMORY_LIMIT: "3g"
+      INDEXER_DISABLE_BLOCK_REWARD_FETCHER: "true"
+      FIRST_BLOCK: "0"
+      TRACE_FIRST_BLOCK: "0"
+      
+      # Smart Contract Verifier
+      MICROSERVICE_SC_VERIFIER_ENABLED: "true"
+      MICROSERVICE_SC_VERIFIER_URL: http://smart-contract-verifier:8050
+      MICROSERVICE_SC_VERIFIER_TYPE: sc_verifier
+      
+      # Redis
+      ACCOUNT_REDIS_URL: ${ACCOUNT_REDIS_URL:-redis://redis:6379/0}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/1}
+      
+      # Security
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE must be set in environment}
+      
+      # API Configuration
+      API_V1_READ_METHODS_DISABLED: "false"
+      API_V1_WRITE_METHODS_DISABLED: "false"
+      API_V2_ENABLED: "true"
+      API_RATE_LIMIT_DISABLED: "false"
+      SHOW_TXS_CHART: "true"
+      
+      # Feature Flags
+      DISABLE_EXCHANGE_RATES: "true"
+      DISABLE_KNOWN_TOKENS: "false"
+      ENABLE_SOURCIFY_INTEGRATION: "true"
+      ENABLE_RUST_VERIFICATION_SERVICE: "true"
+      SHOW_ADDRESS_MARKETCAP_PERCENTAGE: "false"
+      SHOW_PRICE_CHART: "false"
+      HIDE_BLOCK_MINER: "false"
+      RE_CAPTCHA_DISABLED: "true"
+      
+      # Realtime Updates - WebSocket Configuration
+      REALTIME_ENABLED: "true"
+      DISABLE_REALTIME_INDEXER: "false"
+      DISABLE_WEBAPP: "true"
+      SOCKET_ROOT: /socket
+      
+      # WebSocket Settings
+      WEBSOCKET_RATE_LIMIT_TOKEN_BUCKET_SIZE: "10"
+      WEBSOCKET_RATE_LIMIT_TOKEN_BUCKET_REFILL_AMOUNT: "5"
+      WEBSOCKET_RATE_LIMIT_TOKEN_BUCKET_REFILL_INTERVAL: "1000"
+      HEART_BEAT_TIMEOUT: "60"
+      WEBSOCKET_PING_INTERVAL: "30"
+      
+      # Pool & Performance
+      POOL_SIZE: "80"
+      POOL_SIZE_API: "20"
+      ECTO_USE_SSL: "false"
+      
+      # Logging
+      LOG_LEVEL: info
+      LOGGER_JSON_ENABLED: "false"
+      
+      # Locale (fixes WebSocket broadcast crash)
+      DEFAULT_LOCALE: "en"
+    ports:
+      - "4000:4000"
+    volumes:
+      - blockscout_logs:/app/logs
+      - ./assets:/app/apps/block_scout_web/priv/static/images
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/api/v2/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    networks:
+      - blockscout-network
+      - viddhana-network
+    extra_hosts:
+      - "geth-node1:172.18.0.2"
+
+  # ---------------------------------------------------------------------------
+  # Blockscout Frontend
+  # ---------------------------------------------------------------------------
+  frontend:
+    image: ghcr.io/blockscout/frontend:v2.3.0
+    container_name: viddhana-blockscout-frontend
+    restart: unless-stopped
+    environment:
+      # API Configuration - Production URLs via Nginx proxy
+      # API calls go to same host (scan.viddhana.com) which Nginx routes to backend
+      NEXT_PUBLIC_API_HOST: ${NEXT_PUBLIC_API_HOST:-scan.viddhana.com}
+      NEXT_PUBLIC_API_PORT: ${NEXT_PUBLIC_API_PORT:-443}
+      NEXT_PUBLIC_API_PROTOCOL: ${NEXT_PUBLIC_API_PROTOCOL:-https}
+      NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: ${NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL:-wss}
+      
+      # WebSocket Configuration for real-time updates
+      NEXT_PUBLIC_API_BASE_PATH: ${NEXT_PUBLIC_API_BASE_PATH:-}
+      
+      # Network Configuration
+      NEXT_PUBLIC_NETWORK_NAME: ${NEXT_PUBLIC_NETWORK_NAME:-Viddhana}
+      NEXT_PUBLIC_NETWORK_SHORT_NAME: ${NEXT_PUBLIC_NETWORK_SHORT_NAME:-Viddhana}
+      NEXT_PUBLIC_NETWORK_ID: ${NEXT_PUBLIC_NETWORK_ID:-1337}
+      NEXT_PUBLIC_NETWORK_CURRENCY_NAME: ${NEXT_PUBLIC_NETWORK_CURRENCY_NAME:-BTC Diamond}
+      NEXT_PUBLIC_NETWORK_CURRENCY_SYMBOL: ${NEXT_PUBLIC_NETWORK_CURRENCY_SYMBOL:-BTCD}
+      NEXT_PUBLIC_NETWORK_CURRENCY_DECIMALS: ${NEXT_PUBLIC_NETWORK_CURRENCY_DECIMALS:-18}
+      NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE: ${NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE:-validation}
+      NEXT_PUBLIC_IS_TESTNET: ${NEXT_PUBLIC_IS_TESTNET:-false}
+      
+      # Branding - Use empty values to avoid GitHub download failures
+      NEXT_PUBLIC_NETWORK_LOGO: ${NEXT_PUBLIC_NETWORK_LOGO:-}
+      NEXT_PUBLIC_NETWORK_ICON: ${NEXT_PUBLIC_NETWORK_ICON:-}
+      NEXT_PUBLIC_NETWORK_LOGO_DARK: ${NEXT_PUBLIC_NETWORK_LOGO_DARK:-}
+      NEXT_PUBLIC_NETWORK_ICON_DARK: ${NEXT_PUBLIC_NETWORK_ICON_DARK:-}
+      NEXT_PUBLIC_HOMEPAGE_CHARTS: ${NEXT_PUBLIC_HOMEPAGE_CHARTS:-['daily_txs']}
+      NEXT_PUBLIC_HOMEPAGE_HERO_BANNER_CONFIG: '{"background":["linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)"],"text_color":["rgba(255,255,255,1)"]}'
+      
+      # App Configuration - Production host
+      NEXT_PUBLIC_APP_HOST: ${NEXT_PUBLIC_APP_HOST:-scan.viddhana.com}
+      NEXT_PUBLIC_APP_PROTOCOL: ${NEXT_PUBLIC_APP_PROTOCOL:-https}
+      NEXT_PUBLIC_APP_PORT: ${NEXT_PUBLIC_APP_PORT:-443}
+      
+      # External Resources - Production RPC URL
+      NEXT_PUBLIC_NETWORK_RPC_URL: ${NEXT_PUBLIC_NETWORK_RPC_URL:-https://rpc.viddhana.com}
+      NEXT_PUBLIC_FEATURED_NETWORKS: ${NEXT_PUBLIC_FEATURED_NETWORKS:-[]}
+      NEXT_PUBLIC_FOOTER_LINKS: ${NEXT_PUBLIC_FOOTER_LINKS:-[]}
+      NEXT_PUBLIC_OG_ENHANCED_DATA_ENABLED: ${NEXT_PUBLIC_OG_ENHANCED_DATA_ENABLED:-true}
+      NEXT_PUBLIC_VISUALIZE_API_HOST: ${NEXT_PUBLIC_VISUALIZE_API_HOST:-http://visualizer:8050}
+      NEXT_PUBLIC_NETWORK_EXPLORERS: ${NEXT_PUBLIC_NETWORK_EXPLORERS:-[]}
+      
+      # Wallet Configuration
+      NEXT_PUBLIC_WEB3_WALLETS: '["metamask","coinbase"]'
+      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: "b2ec1a68b93496da74628282a7b47c19"
+      
+      # Stats API
+      NEXT_PUBLIC_STATS_API_HOST: ${NEXT_PUBLIC_STATS_API_HOST:-}
+    ports:
+      - "3003:3000"  # Use 3003 externally since 3000 is used by kyc-api
+    depends_on:
+      blockscout:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://$(hostname -i):3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - blockscout-network
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  blockscout-network:
+    driver: bridge
+    name: viddhana-blockscout-network
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+  viddhana-network:
+    external: true
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres_data:
+    name: viddhana-blockscout-postgres-data
+  redis_data:
+    name: viddhana-blockscout-redis-data
+  blockscout_logs:
+    name: viddhana-blockscout-logs
+  sc_verifier_compilers:
+    name: viddhana-sc-verifier-compilers
