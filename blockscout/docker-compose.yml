@@ -209,12 +209,13 @@ services:
     environment:
       # API Configuration - Production URLs via Nginx proxy
       # API calls go to same host (scan.viddhana.com) which Nginx routes to backend
+      # WebSocket uses dedicated ws.viddhana.com to bypass Cloudflare HTTP/2 issues
       NEXT_PUBLIC_API_HOST: ${NEXT_PUBLIC_API_HOST:-scan.viddhana.com}
       NEXT_PUBLIC_API_PORT: ${NEXT_PUBLIC_API_PORT:-443}
       NEXT_PUBLIC_API_PROTOCOL: ${NEXT_PUBLIC_API_PROTOCOL:-https}
       NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: ${NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL:-wss}
       
-      # WebSocket Configuration for real-time updates
+      # WebSocket Configuration - Use separate subdomain to bypass Cloudflare HTTP/2 WebSocket issues
       NEXT_PUBLIC_API_BASE_PATH: ${NEXT_PUBLIC_API_BASE_PATH:-}
       
       # Network Configuration
@@ -254,6 +255,10 @@ services:
       
       # Stats API
       NEXT_PUBLIC_STATS_API_HOST: ${NEXT_PUBLIC_STATS_API_HOST:-}
+      
+      # WebSocket Configuration - Use dedicated WebSocket endpoint
+      NEXT_PUBLIC_WS_HOST: ${NEXT_PUBLIC_WS_HOST:-ws.viddhana.com}
+      NEXT_PUBLIC_WS_PORT: ${NEXT_PUBLIC_WS_PORT:-443}
     ports:
       - "3003:3000"  # Use 3003 externally since 3000 is used by kyc-api
     depends_on:

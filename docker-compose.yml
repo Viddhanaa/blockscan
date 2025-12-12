@@ -32,13 +32,13 @@ services:
       --http.addr 0.0.0.0
       --http.port 8545
       --http.api eth,net,web3,txpool,clique,debug
-      --http.corsdomain ${HTTP_CORSDOMAIN:-https://scan.viddhana.com,https://rpc.viddhana.com}
-      --http.vhosts ${HTTP_VHOSTS:-scan.viddhana.com,rpc.viddhana.com,localhost}
+      --http.corsdomain "https://scan.viddhana.com,https://rpc.viddhana.com,https://pool.viddhana.com,https://miner.viddhana.com,http://localhost:3000,http://localhost:3004,*"
+      --http.vhosts "scan.viddhana.com,rpc.viddhana.com,pool.viddhana.com,miner.viddhana.com,localhost,viddhana-node1,geth-node1,*"
       --ws
       --ws.addr 0.0.0.0
       --ws.port 8546
       --ws.api eth,net,web3,txpool,clique,debug
-      --ws.origins ${WS_ORIGINS:-https://scan.viddhana.com,https://rpc.viddhana.com}
+      --ws.origins "https://scan.viddhana.com,https://rpc.viddhana.com,https://pool.viddhana.com,https://miner.viddhana.com,http://localhost:3000,*"
       --port 30303
       --unlock ${SIGNER_ADDRESS_1}
       --password /root/password.txt --allow-insecure-unlock
@@ -82,13 +82,13 @@ services:
       --http.addr 0.0.0.0
       --http.port 8545
       --http.api eth,net,web3,txpool,clique,debug
-      --http.corsdomain ${HTTP_CORSDOMAIN:-https://scan.viddhana.com,https://rpc.viddhana.com}
-      --http.vhosts ${HTTP_VHOSTS:-scan.viddhana.com,rpc.viddhana.com,localhost}
+      --http.corsdomain "https://scan.viddhana.com,https://rpc.viddhana.com,https://pool.viddhana.com,https://miner.viddhana.com,http://localhost:3000,http://localhost:3004,*"
+      --http.vhosts "scan.viddhana.com,rpc.viddhana.com,pool.viddhana.com,miner.viddhana.com,localhost,viddhana-node2,geth-node2,*"
       --ws
       --ws.addr 0.0.0.0
       --ws.port 8546
       --ws.api eth,net,web3,txpool,clique,debug
-      --ws.origins ${WS_ORIGINS:-https://scan.viddhana.com,https://rpc.viddhana.com}
+      --ws.origins "https://scan.viddhana.com,https://rpc.viddhana.com,https://pool.viddhana.com,https://miner.viddhana.com,http://localhost:3000,*"
       --port 30303
       --unlock ${SIGNER_ADDRESS_2}
       --password /root/password.txt --allow-insecure-unlock
@@ -162,10 +162,14 @@ services:
     environment:
       - PORT=3000
       - BACKEND_WS_URL=ws://viddhana-blockscout-backend:4000
-      - ALLOWED_ORIGINS=*
+      - ALLOWED_ORIGINS=https://scan.viddhana.com,https://ws.viddhana.com,*
+      - MAX_CONNECTIONS=2000
+      - MAX_CONNECTIONS_PER_IP=20
     networks:
       - viddhana-network
       - viddhana-blockscout-network
+    depends_on:
+      - nginx
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/health"]
       interval: 30s

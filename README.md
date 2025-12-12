@@ -2,16 +2,38 @@
 
 A private Ethereum-based blockchain network with Proof of Authority (Clique) consensus, KYC smart contracts, and Blockscout block explorer.
 
+![Version](https://img.shields.io/badge/Version-1.0.0-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Status](https://img.shields.io/badge/Status-Mainnet%20Live-success) ![Blocks](https://img.shields.io/badge/Blocks-69K+-brightgreen)
+
 ## Live URLs
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Block Explorer** | https://scan.viddhana.com | Blockscout Explorer |
-| **RPC Endpoint** | https://rpc.viddhana.com | JSON-RPC API |
-| **KYC API** | https://api.viddhana.com | KYC REST API |
-| **WebSocket** | wss://wss.viddhana.com | Direct WebSocket to backend |
-| **Main Website** | https://viddhana.com | Main website |
-| **Documentation** | https://docs.viddhana.com | Documentation site |
+| Service | URL | Port | Status |
+|---------|-----|------|--------|
+| Block Explorer | https://explorer.viddhana.com | 15000 | Live |
+| RPC Endpoint | https://rpc.viddhana.com | 8545 | Live |
+| WebSocket | wss://wss.viddhana.com | 4000 | Live |
+| KYC API | https://api.viddhana.com | 4002 | Live |
+| Landing Page | https://viddhana.com | 3200 | Live |
+| Miner Dashboard | https://miner.viddhana.com | 8000 | Live |
+| Mining Pool | https://pool.viddhana.com | 3004 | Live |
+
+## Network Details
+
+| Parameter | Value |
+|-----------|-------|
+| Network Name | Viddhana |
+| Chain ID | 1337 |
+| Consensus | Clique (Proof-of-Authority) |
+| Block Time | ~3 seconds |
+| Native Coin | BTCD (BTC Diamond) |
+| Gas Limit | 30,000,000 |
+
+### Key Addresses
+
+| Name | Address |
+|------|---------|
+| Validator 1 (Hot Wallet) | `0xC6EF29019d6acB8F50F464A015CfeA63a8a45C15` |
+| Validator 2 | `0x24E63eFDaBB8103e5125e8Ed3428773bbFA72ec4` |
+| KYC Contract | `0x066eB73F28c48B5ef07CB82E0522e233794C451e` |
 
 ## Architecture
 
@@ -27,22 +49,22 @@ A private Ethereum-based blockchain network with Proof of Authority (Clique) con
         │                              │                              │
         ▼                              ▼                              ▼
 ┌───────────────┐           ┌─────────────────┐           ┌───────────────┐
-│ scan.viddhana │           │ rpc.viddhana    │           │ api.viddhana  │
-│ .com          │           │ .com            │           │ .com          │
+│explorer.      │           │ rpc.viddhana    │           │ api.viddhana  │
+│viddhana.com   │           │ .com            │           │ .com          │
 │ (Explorer)    │           │ (RPC)           │           │ (KYC API)     │
 └───────┬───────┘           └────────┬────────┘           └───────┬───────┘
         │                            │                            │
         ▼                            │                            ▼
 ┌───────────────┐                    │                   ┌───────────────┐
 │ Nginx :15000  │                    │                   │ Express.js    │
-│ Reverse Proxy │                    │                   │ :3001         │
+│ Reverse Proxy │                    │                   │ :4002         │
 └───────┬───────┘                    │                   └───────┬───────┘
         │                            │                            │
    ┌────┴────┐                       │                            │
    ▼         ▼                       ▼                            ▼
 ┌──────┐ ┌────────┐         ┌─────────────────┐          ┌───────────────┐
 │Front │ │Backend │◄───────►│   Geth Node 1   │◄────────►│ ViddhanaKYC   │
-│:13000│ │:14000  │         │   :8545         │          │ Contract      │
+│:3003 │ │:4000   │         │   :8545         │          │ Contract      │
 └──────┘ └────┬───┘         └────────┬────────┘          └───────────────┘
               │                      │
               ▼                      │
@@ -63,8 +85,8 @@ A private Ethereum-based blockchain network with Proof of Authority (Clique) con
    - **Network Name**: `Viddhana`
    - **RPC URL**: `https://rpc.viddhana.com`
    - **Chain ID**: `1337`
-   - **Currency Symbol**: `ETH`
-   - **Block Explorer**: `https://scan.viddhana.com`
+   - **Currency Symbol**: `BTCD`
+   - **Block Explorer**: `https://explorer.viddhana.com`
 
 ### API Usage
 
@@ -73,28 +95,14 @@ A private Ethereum-based blockchain network with Proof of Authority (Clique) con
 curl "https://api.viddhana.com/rpc/check_kyc?address=0xYourAddress"
 
 # Get Blockchain Stats
-curl https://scan.viddhana.com/api/v2/stats
+curl https://explorer.viddhana.com/api/v2/stats
+
+# Get Latest Blocks
+curl https://explorer.viddhana.com/api/v2/blocks
+
+# Get Address Info
+curl https://explorer.viddhana.com/api/v2/addresses/0xC6EF29019d6acB8F50F464A015CfeA63a8a45C15
 ```
-
-## Network Details
-
-| Parameter | Value |
-|-----------|-------|
-| Network Name | Viddhana |
-| Chain ID | 1337 |
-| Consensus | Clique (Proof-of-Authority) |
-| Block Time | ~5 seconds |
-| Currency | ETH |
-
-### Key Addresses
-
-| Name | Address |
-|------|---------|
-| Validator 1 | `0xC6EF29019d6acB8F50F464A015CfeA63a8a45C15` |
-| Validator 2 | `0x24E63eFDaBB8103e5125e8Ed3428773bbFA72ec4` |
-| KYC Contract | `0x066eB73F28c48B5ef07CB82E0522e233794C451e` |
-
-## Project Structure
 
 ```
 viddhana-blockscan/
@@ -125,10 +133,10 @@ viddhana-blockscan/
 |-----------|------|---------|
 | viddhana-node1 | 8545, 8546, 30303 | Primary validator |
 | viddhana-node2 | 8547, 8548, 30304 | Secondary validator |
-| viddhana-blockscout-backend | 4000, 14000 | Explorer indexer & API |
-| viddhana-blockscout-frontend | 13000 | Explorer UI |
+| viddhana-blockscout-backend | 4000 | Explorer indexer & API |
+| viddhana-blockscout-frontend | 3003 | Explorer UI |
 | viddhana-nginx | 15000 | Reverse proxy |
-| viddhana-kyc-api | 3001 | KYC middleware API |
+| viddhana-kyc-api | 4002 | KYC middleware API |
 | viddhana-ws-relay | 16000 | WebSocket relay |
 | viddhana-db | 5432 | PostgreSQL database |
 | viddhana-redis | 6379 | Redis cache |
@@ -207,15 +215,47 @@ docker restart viddhana-blockscout-frontend
 sudo systemctl restart cloudflared
 ```
 
+## Cloudflare Tunnel Configuration
+
+Location: `/etc/cloudflared/config.yml`
+
+```yaml
+# Block Explorer
+- hostname: explorer.viddhana.com
+  service: http://127.0.0.1:15000
+  originRequest:
+    noTLSVerify: true
+    connectTimeout: 300s
+    http2Origin: false
+    disableChunkedEncoding: true
+
+# RPC Endpoint
+- hostname: rpc.viddhana.com
+  service: http://127.0.0.1:8545
+
+# WebSocket
+- hostname: wss.viddhana.com
+  service: http://127.0.0.1:4000
+  originRequest:
+    noTLSVerify: true
+    http2Origin: false
+
+# KYC API
+- hostname: api.viddhana.com
+  service: http://127.0.0.1:4002
+```
+
 ## License
 
 MIT License - See LICENSE file for details.
 
 ## Support
 
+- **Landing Page**: https://viddhana.com
+- **Block Explorer**: https://explorer.viddhana.com
 - **Email**: support@viddhana.com
 - **GitHub**: https://github.com/viddhana
 
 ---
 
-*Last updated: December 9, 2025*
+*Last updated: December 11, 2025*

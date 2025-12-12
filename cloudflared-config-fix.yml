@@ -1,7 +1,15 @@
 tunnel: blockscan
 credentials-file: /etc/cloudflared/blockscan.json
-# Changed from quic to http2 to fix WebSocket issues
+# Use http2 protocol - required for better WebSocket compatibility
 protocol: http2
+
+# Global origin request settings
+originRequest:
+  noTLSVerify: true
+  connectTimeout: 30s
+  tcpKeepAlive: 30s
+  keepAliveConnections: 100
+  keepAliveTimeout: 120s
 
 ingress:
   - hostname: viddhana.com
@@ -28,17 +36,18 @@ ingress:
     service: http://127.0.0.1:8545
   - hostname: api.viddhana.com
     service: http://127.0.0.1:4002
-  # WebSocket subdomain - route to nginx with WebSocket support
+  # WebSocket subdomain - route to websocket-relay for direct WebSocket support
   - hostname: ws.viddhana.com
-    service: http://127.0.0.1:15000
+    service: http://127.0.0.1:16000
     originRequest:
       noTLSVerify: true
-      connectTimeout: 60s
+      connectTimeout: 120s
       http2Origin: false
       disableChunkedEncoding: true
-      keepAliveConnections: 100
-      keepAliveTimeout: 90s
-  # Main scan subdomain with WebSocket support
+      keepAliveConnections: 200
+      keepAliveTimeout: 300s
+      noHappyEyeballs: true
+  # Main scan subdomain - route to nginx
   - hostname: scan.viddhana.com
     service: http://127.0.0.1:15000
     originRequest:
