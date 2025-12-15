@@ -29,7 +29,13 @@ header[class*="Header"],
 
 .header-logo,
 .navbar-brand {
-  filter: brightness(1.1);
+  filter: brightness(1.05) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: filter 0.2s ease;
+}
+
+.header-logo:hover,
+.navbar-brand:hover {
+  filter: brightness(1.1) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
 .header nav a,
@@ -256,8 +262,14 @@ footer a:hover {
   color: var(--viddhana-secondary) !important;
 }
 
-.footer__logo {
+.footer__logo,
+.footer img[src*="logo"],
+footer img[src*="logo"] {
   opacity: 0.9;
+  max-height: 40px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  filter: brightness(1.2);
 }
 
 .footer__copyright {
@@ -437,39 +449,53 @@ table tbody tr:hover {
 }
 
 /* ============================================
-   Hide Blockscout Logo and Branding
+   Logo Styling
    ============================================ */
-/* Hide logo in header */
-header a[href="/"] > div:first-child,
-.chakra-stack a[href="/"] svg,
-.chakra-stack a[href="/"] img,
-a[aria-label*="logo"],
-a[aria-label*="Logo"],
-[class*="NetworkLogo"],
-[class*="network-logo"],
-[data-testid="network-logo"],
-header [class*="Logo"],
-nav [class*="Logo"] {
-  display: none !important;
-  visibility: hidden !important;
+/* Header logo styling with proper dimensions */
+header a[href="/"] img,
+[class*="NetworkLogo"] img,
+[data-testid="network-logo"] img,
+header [class*="Logo"] img {
+  max-height: 48px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
-/* Hide "Blockscout" text */
-header a[href="/"] span,
-[class*="NetworkName"],
-[class*="network-name"],
-header [class*="chakra-text"]:first-of-type {
-  display: none !important;
+/* Icon styling */
+[class*="network-icon"] img,
+[class*="NetworkIcon"] img {
+  max-height: 32px !important;
+  max-width: 32px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
 }
 
-/* Remove the entire logo container if needed */
-header > div > div:first-child > a[href="/"] {
-  display: none !important;
-}
-
-/* Alternative: Hide by targeting specific Blockscout elements */
+/* Ensure logo containers are visible */
+header a[href="/"],
+header a[href="/"] > div,
+.chakra-stack a[href="/"],
 [class*="HeaderLogo"],
 [class*="header-logo"],
 [class*="TopBar"] a[href="/"]:first-child {
-  display: none !important;
+  display: flex !important;
+  align-items: center !important;
+  visibility: visible !important;
 }
+
+/* Logo hover effect */
+header a[href="/"] img:hover {
+  filter: brightness(1.1);
+  transition: filter 0.2s ease;
+}
+
+/* Responsive logo sizing */
+@media (max-width: 768px) {
+  header a[href="/"] img,
+  [class*="NetworkLogo"] img {
+    max-height: 36px !important;
+  }
+}
+

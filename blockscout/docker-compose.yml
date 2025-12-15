@@ -228,11 +228,13 @@ services:
       NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE: ${NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE:-validation}
       NEXT_PUBLIC_IS_TESTNET: ${NEXT_PUBLIC_IS_TESTNET:-false}
       
-      # Branding - Use empty values to avoid GitHub download failures
-      NEXT_PUBLIC_NETWORK_LOGO: ${NEXT_PUBLIC_NETWORK_LOGO:-}
-      NEXT_PUBLIC_NETWORK_ICON: ${NEXT_PUBLIC_NETWORK_ICON:-}
-      NEXT_PUBLIC_NETWORK_LOGO_DARK: ${NEXT_PUBLIC_NETWORK_LOGO_DARK:-}
-      NEXT_PUBLIC_NETWORK_ICON_DARK: ${NEXT_PUBLIC_NETWORK_ICON_DARK:-}
+      # Branding - Use local logo files
+      NEXT_PUBLIC_NETWORK_LOGO: https://scan.viddhana.com/images/logo_headerr.png
+      NEXT_PUBLIC_NETWORK_ICON: https://scan.viddhana.com/images/logo_headerr.png
+      NEXT_PUBLIC_NETWORK_LOGO_DARK: https://scan.viddhana.com/images/logo_headerr.png
+      NEXT_PUBLIC_NETWORK_ICON_DARK: https://scan.viddhana.com/images/logo_headerr.png
+      NEXT_PUBLIC_FAVICON_GENERATOR_URL: https://scan.viddhana.com/images/logo_headerr.png
+      NEXT_PUBLIC_OG_IMAGE_URL: https://scan.viddhana.com/images/logo_headerr.png
       NEXT_PUBLIC_HOMEPAGE_CHARTS: ${NEXT_PUBLIC_HOMEPAGE_CHARTS:-['daily_txs']}
       NEXT_PUBLIC_HOMEPAGE_HERO_BANNER_CONFIG: '{"background":["linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)"],"text_color":["rgba(255,255,255,1)"]}'
       
