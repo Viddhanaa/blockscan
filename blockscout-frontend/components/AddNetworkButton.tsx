@@ -31,7 +31,7 @@ const VIDDHANA_CHAIN_CONFIG = {
   },
   rpcUrls: ['http://localhost:8545'],
   blockExplorerUrls: ['http://localhost:4000'],
-  iconUrls: ['/icon.svg'],
+  iconUrls: ['/images/logo_headerr.png'],
 };
 
 // For production, update with actual values
@@ -45,7 +45,7 @@ const VIDDHANA_CHAIN_CONFIG_PROD = {
   },
   rpcUrls: ['https://rpc.viddhana.io'],
   blockExplorerUrls: ['https://explorer.viddhana.io'],
-  iconUrls: ['https://explorer.viddhana.io/icon.svg'],
+  iconUrls: ['https://scan.viddhana.com/images/logo_headerr.png'],
 };
 
 type NetworkStatus = 'idle' | 'adding' | 'switching' | 'success' | 'error';

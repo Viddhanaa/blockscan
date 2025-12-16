@@ -109,9 +109,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy custom assets
-COPY --from=builder /app/public/logo.svg ./public/logo.svg
-COPY --from=builder /app/public/logo-dark.svg ./public/logo-dark.svg
-COPY --from=builder /app/public/icon.svg ./public/icon.svg
+COPY --from=builder /app/public/logo_headerr.png ./public/logo_headerr.png
+COPY --from=builder /app/public/logo.png ./public/logo.png
+COPY --from=builder /app/public/icon.png ./public/icon.png
 
 # Switch to non-root user
 USER nextjs
